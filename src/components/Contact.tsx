@@ -7,9 +7,9 @@ export default function Contact() {
       <div className="contact-container" style={{ marginTop: '4rem', display: 'flex', justifyContent: 'center' }}>
         <div className="contact-info" style={{ maxWidth: '600px', width: '100%' }}>
           <div className="contact-card glass-card">
-            <h3>Let's talk about your project</h3>
+            <h3>Open to Opportunities</h3>
             <p>
-              I am open to discuss engineering challenges, frontend architecture, or job opportunities.
+              I am open to discussing software engineering roles and job opportunities.
             </p>
             
             <div className="contact-item">

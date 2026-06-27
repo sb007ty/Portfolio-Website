@@ -1,76 +1,11 @@
-import React, { useState } from 'react';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
-
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [statusMsg, setStatusMsg] = useState('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) {
-      setStatus('error');
-      setStatusMsg('Please fill in all required fields.');
-      return;
-    }
-
-    setStatus('loading');
-
-    const accessKey = import.meta.env.VITE_WEB3FORMS_KEY;
-    if (!accessKey || accessKey === 'YOUR_ACCESS_KEY_HERE') {
-      setStatus('error');
-      setStatusMsg('Contact form is not fully configured. Please set the VITE_WEB3FORMS_KEY in the .env file.');
-      return;
-    }
-
-    try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          access_key: accessKey,
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject || 'New Portfolio Contact Submission',
-          message: formData.message,
-          from_name: 'Portfolio Website'
-        })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setStatus('success');
-        setStatusMsg('Thank you! Your message has been sent successfully.');
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      } else {
-        setStatus('error');
-        setStatusMsg(result.message || 'Something went wrong. Please try again.');
-      }
-    } catch (err) {
-      setStatus('error');
-      setStatusMsg('Failed to send message. Please check your internet connection.');
-    }
-  };
-
   return (
     <section id="contact" className="section">
       <h2 className="text-gradient">Get In Touch</h2>
       
-      <div className="contact-container" style={{ marginTop: '4rem' }}>
-        <div className="contact-info">
+      <div className="contact-container" style={{ marginTop: '4rem', display: 'flex', justifyContent: 'center' }}>
+        <div className="contact-info" style={{ maxWidth: '600px', width: '100%' }}>
           <div className="contact-card glass-card">
             <h3>Let's talk about your project</h3>
             <p>
@@ -86,7 +21,7 @@ export default function Contact() {
               </div>
               <div className="contact-text">
                 <h4>Email</h4>
-                <p><a href="mailto:spandan8b@gmail.com" style={{ color: '#fff' }}>spandan8b@gmail.com</a></p>
+                <p><a href="mailto:spandan9b@gmail.com" style={{ color: '#fff' }}>spandan9b@gmail.com</a></p>
               </div>
             </div>
 
@@ -131,72 +66,6 @@ export default function Contact() {
             </div>
           </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="contact-form glass-card">
-          <div className="form-group">
-            <label htmlFor="name" className="form-label">Name *</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Your name"
-              className="form-control"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Email *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="your.email@example.com"
-              className="form-control"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="subject" className="form-label">Subject</label>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              placeholder="Collaboration or technical inquiry..."
-              className="form-control"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="message" className="form-label">Message *</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="Describe your goals, requests or questions..."
-              className="form-control"
-              required
-            />
-          </div>
-
-          {status !== 'idle' && (
-            <div className={`form-status ${status}`}>
-              {status === 'loading' ? 'Sending message...' : statusMsg}
-            </div>
-          )}
-
-          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }} id="contact-submit-btn" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Sending...' : 'Send Message'}
-          </button>
-        </form>
       </div>
     </section>
   );

@@ -16,7 +16,7 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       setStatus('error');
@@ -26,12 +26,43 @@ export default function Contact() {
 
     setStatus('loading');
 
-    // Simulate API request
-    setTimeout(() => {
-      setStatus('success');
-      setStatusMsg('Thank you! Your message has been sent successfully.');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1500);
+    const accessKey = import.meta.env.VITE_WEB3FORMS_KEY;
+    if (!accessKey || accessKey === 'YOUR_ACCESS_KEY_HERE') {
+      setStatus('error');
+      setStatusMsg('Contact form is not fully configured. Please set the VITE_WEB3FORMS_KEY in the .env file.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject || 'New Portfolio Contact Submission',
+          message: formData.message,
+          from_name: 'Portfolio Website'
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setStatus('success');
+        setStatusMsg('Thank you! Your message has been sent successfully.');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        setStatus('error');
+        setStatusMsg(result.message || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      setStatus('error');
+      setStatusMsg('Failed to send message. Please check your internet connection.');
+    }
   };
 
   return (

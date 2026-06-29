@@ -24,7 +24,7 @@ export default function Contact() {
                 <p><a href="mailto:spandan9b@gmail.com" style={{ color: '#fff' }}>spandan9b@gmail.com</a></p>
               </div>
             </div>
-
+            {/* 
             <div className="contact-item">
               <div className="contact-icon-wrapper">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -32,9 +32,9 @@ export default function Contact() {
                 </svg>
               </div>
               <div className="contact-text">
-                {/* <h4>Phone</h4> */}
+                <h4>Phone</h4>
               </div>
-            </div>
+            </div> */}
 
             <div className="contact-item">
               <div className="contact-icon-wrapper">

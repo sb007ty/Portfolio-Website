@@ -14,7 +14,7 @@ function App() {
     
     const observerOptions = {
       root: null,
-      rootMargin: '-35% 0px -40% 0px', // Trigger active state when section enters center of screen
+      rootMargin: '-35% 0px -40% 0px',
       threshold: 0,
     };
 
@@ -38,8 +38,38 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
+  // Track cursor position to update CSS variable for background glow
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Initialize intersection observer for scroll-reveal animations
+  useEffect(() => {
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -60px 0px' }
+    );
+    revealElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="app-container">
+      {/* Interactive mouse follow glow */}
+      <div className="mouse-glow" aria-hidden="true"></div>
+
       {/* Background Decorative Neon Glows */}
       <div className="bg-glow-container" aria-hidden="true">
         <div className="bg-glow-1"></div>
@@ -52,10 +82,18 @@ function App() {
       {/* Main Sections */}
       <main>
         <Hero />
-        <About />
-        <Projects />
-        <Experience />
-        <Contact />
+        <div className="reveal">
+          <About />
+        </div>
+        <div className="reveal">
+          <Projects />
+        </div>
+        <div className="reveal">
+          <Experience />
+        </div>
+        <div className="reveal">
+          <Contact />
+        </div>
       </main>
 
       {/* Footer */}

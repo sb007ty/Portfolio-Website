@@ -78,13 +78,71 @@ export default function Hero() {
         </div>
 
         <div className="hero-visual">
-          <div className="hero-blob-wrapper"></div>
+          <div className="hero-toy-container">
+            <img 
+              src="/src/assets/avatar.png" 
+              alt="Spandan Banerjee Software Engineer Action Figure" 
+              className="hero-toy-image" 
+            />
+          </div>
         </div>
       </div>
       <style>{`
         @keyframes blink {
           from, to { border-color: transparent }
           50% { border-color: var(--secondary); }
+        }
+        
+        .hero-toy-container {
+          position: relative;
+          max-width: 340px;
+          width: 100%;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(168, 85, 247, 0.15);
+          transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transform: perspective(1000px) rotateY(-8deg) rotateX(4deg) rotateZ(-1deg);
+        }
+
+        .hero-toy-container:hover {
+          transform: perspective(1000px) rotateY(4deg) rotateX(-4deg) rotateZ(0deg) translateY(-8px) scale(1.04);
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 45px rgba(168, 85, 247, 0.35);
+          border-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .hero-toy-image {
+          width: 100%;
+          height: auto;
+          display: block;
+          object-fit: cover;
+          transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        /* Highlight shimmer effect on hover */
+        .hero-toy-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -150%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.15) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: skewX(-20deg);
+          transition: none;
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        .hero-toy-container:hover::before {
+          left: 150%;
+          transition: all 0.8s ease-in-out;
         }
       `}</style>
     </section>

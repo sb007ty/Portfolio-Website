@@ -265,7 +265,8 @@ a {
   background: rgba(10, 11, 16, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: none !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
   padding: 1rem 2rem;
 }
 
@@ -971,4 +972,112 @@ textarea.form-control {
 .reveal.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Floating Theme Switcher Button */
+.theme-switcher-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  background: rgba(17, 19, 30, 0.85);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
+  border-radius: 30px;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.theme-switcher-btn:hover {
+  transform: scale(1.05) translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px var(--primary-glow);
+}
+
+.theme-switcher-text {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+  .theme-switcher-btn {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: 0.6rem 1rem;
+  }
+  .theme-switcher-text {
+    display: none;
+  }
+}
+
+/* Theme Overrides */
+html.theme-matrix {
+  --bg-primary: #020202;
+  --bg-secondary: #080808;
+  --bg-card: rgba(5, 10, 5, 0.7);
+  --bg-card-hover: rgba(10, 20, 10, 0.85);
+  --border-color: rgba(34, 197, 94, 0.15);
+  --border-color-hover: rgba(34, 197, 94, 0.6);
+  --text-primary: #22c55e;
+  --text-secondary: #4ade80;
+  --text-muted: #15803d;
+  --primary: #22c55e;
+  --secondary: #166534;
+  --accent: #86efac;
+  --primary-glow: rgba(34, 197, 94, 0.2);
+  --secondary-glow: rgba(22, 101, 52, 0.2);
+  --gradient-primary: linear-gradient(135deg, #22c55e, #166534);
+  --gradient-text: linear-gradient(135deg, #ffffff 20%, #22c55e 80%, #166534 100%);
+  --font-sans: 'Fira Code', monospace;
+  --font-heading: 'Fira Code', monospace;
+}
+
+html.theme-synthwave {
+  --bg-primary: #120924;
+  --bg-secondary: #1d0f36;
+  --bg-card: rgba(35, 15, 64, 0.6);
+  --bg-card-hover: rgba(50, 20, 90, 0.8);
+  --border-color: rgba(255, 0, 128, 0.15);
+  --border-color-hover: rgba(255, 0, 128, 0.5);
+  --text-primary: #ffe6ff;
+  --text-secondary: #f472b6;
+  --text-muted: #db2777;
+  --primary: #ff007f;
+  --secondary: #ff7700;
+  --accent: #00ffff;
+  --primary-glow: rgba(255, 0, 127, 0.2);
+  --secondary-glow: rgba(255, 119, 0, 0.2);
+  --gradient-primary: linear-gradient(135deg, #ff007f, #ff7700);
+  --gradient-text: linear-gradient(135deg, #ffffff 30%, #ff007f 70%, #ff7700 100%);
+}
+
+html.theme-slate {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --bg-card-hover: rgba(51, 65, 85, 0.9);
+  --border-color: rgba(148, 163, 184, 0.15);
+  --border-color-hover: rgba(59, 130, 246, 0.6);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #3b82f6;
+  --secondary: #64748b;
+  --accent: #60a5fa;
+  --primary-glow: rgba(59, 130, 246, 0.2);
+  --secondary-glow: rgba(100, 116, 139, 0.2);
+  --gradient-primary: linear-gradient(135deg, #3b82f6, #64748b);
+  --gradient-text: linear-gradient(135deg, #ffffff 30%, #3b82f6 70%, #60a5fa 100%);
 }

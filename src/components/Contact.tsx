@@ -3,7 +3,7 @@ export default function Contact() {
   return (
     <section id="contact" className="section">
       <h2 className="text-gradient">Get In Touch</h2>
-      
+
       <div className="contact-container" style={{ marginTop: '4rem', display: 'flex', justifyContent: 'center' }}>
         <div className="contact-info" style={{ maxWidth: '600px', width: '100%' }}>
           <div className="contact-card glass-card">
@@ -11,7 +11,7 @@ export default function Contact() {
             <p>
               I am open to discussing software engineering roles and job opportunities.
             </p>
-            
+
             <div className="contact-item">
               <div className="contact-icon-wrapper">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -33,7 +33,6 @@ export default function Contact() {
               </div>
               <div className="contact-text">
                 <h4>Phone</h4>
-                <p style={{ color: '#fff' }}>+91-8017757055</p>
               </div>
             </div>
 
@@ -49,7 +48,7 @@ export default function Contact() {
                 <p>Mumbai, India (Open to remote/relocation)</p>
               </div>
             </div>
-            
+
             <div className="social-links">
               <a href="https://github.com/sb007ty" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="GitHub" id="contact-github-link">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

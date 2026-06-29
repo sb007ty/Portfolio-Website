@@ -60,7 +60,8 @@ const DATA_SKILLS = [
   { label: 'Jest / RTL', categoryId: 'devops' },
   { label: 'Docker', categoryId: 'devops' },
   { label: 'Kubernetes', categoryId: 'devops' },
-  { label: 'Cypress / Playwright', categoryId: 'devops' },
+  { label: 'Cypress', categoryId: 'devops' },
+  { label: 'Playwright', categoryId: 'devops' },
   { label: 'Git / GitLab', categoryId: 'devops' },
   { label: 'CI/CD Pipelines', categoryId: 'devops' },
   { label: 'AWS', categoryId: 'devops' },
@@ -127,15 +128,29 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = (canvas.width = container.clientWidth);
-    let height = (canvas.height = 480); // Fixed responsive height for force graph area
+    // Retina/High-DPI Auto-Scaling Configuration
+    const dpr = window.devicePixelRatio || 1;
+    let rect = container.getBoundingClientRect();
+    let width = rect.width;
+    let height = 480;
 
-    const handleResize = () => {
-      if (container) {
-        width = canvas.width = container.clientWidth;
-      }
+    const resizeCanvas = () => {
+      if (!canvas || !container) return;
+      rect = container.getBoundingClientRect();
+      width = rect.width;
+      height = 480;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
     };
-    window.addEventListener('resize', handleResize);
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     const colors = getThemePalette();
 
@@ -145,9 +160,9 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
 
     // Create category core nodes
     DATA_CATEGORIES.forEach((cat, idx) => {
-      // Position category hubs symmetrically in a circle
+      // Position category hubs symmetrically in a circle around center
       const angle = (idx / DATA_CATEGORIES.length) * Math.PI * 2;
-      const radiusFromCenter = Math.min(width, height) * 0.25;
+      const radiusFromCenter = Math.min(width, height) * 0.22;
       
       nodes.push({
         id: cat.id,
@@ -158,7 +173,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         y: height / 2 + Math.sin(angle) * radiusFromCenter,
         vx: 0,
         vy: 0,
-        radius: 35,
+        radius: 36,
         color: colors[cat.colorIndex % colors.length],
       });
     });
@@ -168,15 +183,18 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
       const parent = nodes.find((n) => n.id === skill.categoryId);
       if (!parent) return;
 
-      // Random position slightly offset from parent hub
+      // Spacing out around parent hub
       const angle = Math.random() * Math.PI * 2;
-      const offset = 60 + Math.random() * 50;
+      const offset = 65 + Math.random() * 45;
 
       const nodeColors = getThemePalette();
       const parentCatIdx = DATA_CATEGORIES.findIndex((c) => c.id === skill.categoryId);
       const baseColor = nodeColors[parentCatIdx % nodeColors.length];
 
       const skillNodeId = `skill-${idx}`;
+      // Balanced node sizing to fit comfortably inside canvas height
+      const dynamicRadius = Math.max(22, skill.label.length * 2.8 + 8);
+      
       nodes.push({
         id: skillNodeId,
         label: skill.label,
@@ -186,7 +204,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         y: parent.y + Math.sin(angle) * offset,
         vx: 0,
         vy: 0,
-        radius: skill.label.length * 4.5 + 10, // Dynamic radius based on label length
+        radius: dynamicRadius,
         color: baseColor,
       });
 
@@ -194,27 +212,36 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
       links.push({
         source: skillNodeId,
         target: skill.categoryId,
-        length: 75 + Math.random() * 20, // Spring rest length
+        length: 70 + Math.random() * 15, // Spring rest length
       });
     });
 
     // 2. Event Listeners for Interaction
     const getMousePos = (e: MouseEvent | TouchEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const canvasRect = canvas.getBoundingClientRect();
+      let clientX = 0;
+      let clientY = 0;
+
+      if ('touches' in e) {
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        }
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
       return {
-        x: clientX - rect.left,
-        y: clientY - rect.top,
+        x: clientX - canvasRect.left,
+        y: clientY - canvasRect.top,
       };
     };
 
     const handleMouseDown = (e: MouseEvent | TouchEvent) => {
-      if ('touches' in e) {
-        // Prevent default double-tap zoom
-        if (e.touches.length > 1) return;
-      }
-      
       const pos = getMousePos(e);
       mouseRef.current.x = pos.x;
       mouseRef.current.y = pos.y;
@@ -241,7 +268,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
       mouseRef.current.x = pos.x;
       mouseRef.current.y = pos.y;
 
-      // Find hovered node (only for styling cursor on hover)
+      // Find hovered node
       let hoverNode: Node | null = null;
       for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i];
@@ -253,7 +280,6 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
       }
       setHoveredNode(hoverNode);
       
-      // If hover over node, trigger custom cursor expand class
       if (hoverNode) {
         document.documentElement.classList.add('cursor-expand');
       } else {
@@ -280,16 +306,17 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
     let animationId: number;
 
     const simulate = () => {
-      const gravity = 0.02; // Gentle central pull
-      const damping = 0.85; // Viscous velocity friction
-      const bounce = 0.5;
+      // Adjusted constants for physical stability
+      const gravity = 0.015; // Gentle center pull
+      const damping = 0.88; // Viscous velocity friction
+      const bounce = 0.4;
 
       // Apply forces to nodes
       nodes.forEach((n) => {
         if (n === draggedNodeRef.current) {
           // Locked to mouse coordinates if dragging
-          n.x += (mouseRef.current.x - n.x) * 0.25;
-          n.y += (mouseRef.current.y - n.y) * 0.25;
+          n.x += (mouseRef.current.x - n.x) * 0.28;
+          n.y += (mouseRef.current.y - n.y) * 0.28;
           n.vx = 0;
           n.vy = 0;
           return;
@@ -298,8 +325,8 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         // Pull towards canvas center
         const dxCenter = width / 2 - n.x;
         const dyCenter = height / 2 - n.y;
-        n.vx += dxCenter * gravity * (n.isCategory ? 1.5 : 0.8) * 0.01;
-        n.vy += dyCenter * gravity * (n.isCategory ? 1.5 : 0.8) * 0.01;
+        n.vx += dxCenter * gravity * (n.isCategory ? 1.6 : 0.7) * 0.02;
+        n.vy += dyCenter * gravity * (n.isCategory ? 1.6 : 0.7) * 0.02;
 
         // Apply velocities with damping friction
         n.vx *= damping;
@@ -307,7 +334,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         n.x += n.vx;
         n.y += n.vy;
 
-        // Keep inside canvas bounds
+        // Boundary restraints
         if (n.x - n.radius < 0) {
           n.x = n.radius;
           n.vx *= -bounce;
@@ -334,15 +361,14 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         const dy = targetNode.y - sourceNode.y;
         const distance = Math.hypot(dx, dy) || 1;
 
-        // Elastic spring constant Hooke's Law
-        const stiffness = 0.035;
+        // Hooke's Law spring simulation
+        const stiffness = 0.022;
         const delta = distance - l.length;
         const force = delta * stiffness;
 
         const fx = (dx / distance) * force;
         const fy = (dy / distance) * force;
 
-        // Accelerate nodes towards each other
         if (sourceNode !== draggedNodeRef.current) {
           sourceNode.vx += fx;
           sourceNode.vy += fy;
@@ -353,7 +379,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
         }
       });
 
-      // Apply Node-to-Node Repulsion Collision (prevent overlaps)
+      // Apply Node-to-Node Repulsion Collision (prevent overlap jittering)
       for (let i = 0; i < nodes.length; i++) {
         const n1 = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
@@ -361,13 +387,13 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
           const dx = n2.x - n1.x;
           const dy = n2.y - n1.y;
           const dist = Math.hypot(dx, dy) || 1;
-          const minDist = n1.radius + n2.radius + 12; // Radius sum + padding buffer
+          const minDist = n1.radius + n2.radius + 10; // Pad distance
 
           if (dist < minDist) {
-            // Push overlapping nodes apart
             const overlap = minDist - dist;
-            const pushX = (dx / dist) * overlap * 0.15;
-            const pushY = (dy / dist) * overlap * 0.15;
+            // Lower multiplier prevents extreme velocity explosions (soft body style)
+            const pushX = (dx / dist) * overlap * 0.06;
+            const pushY = (dy / dist) * overlap * 0.06;
 
             if (n1 !== draggedNodeRef.current) {
               n1.vx -= pushX;
@@ -385,14 +411,14 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
       ctx.clearRect(0, 0, width, height);
 
       // Draw Links (connecting glowing lines)
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.2;
       links.forEach((l) => {
         const sourceNode = nodes.find((n) => n.id === l.source);
         const targetNode = nodes.find((n) => n.id === l.target);
         if (!sourceNode || !targetNode) return;
 
-        // Draw line with opacity based on parent color
-        ctx.strokeStyle = `${sourceNode.color}2A`; // Hex with low alpha transparency
+        // Transparent link connection lines
+        ctx.strokeStyle = `${sourceNode.color}24`; 
         ctx.beginPath();
         ctx.moveTo(sourceNode.x, sourceNode.y);
         ctx.lineTo(targetNode.x, targetNode.y);
@@ -406,16 +432,14 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
 
         ctx.save();
 
-        // Glowing outer neon shadow for nodes
+        // Neon outer shadow glow
         ctx.shadowColor = n.color;
         ctx.shadowBlur = isHovered || isDragged ? 14 : 4;
 
-        // Fill background
-        ctx.fillStyle = isHovered || isDragged ? n.color : 'rgba(10, 10, 12, 0.75)';
+        ctx.fillStyle = isHovered || isDragged ? n.color : 'rgba(10, 10, 12, 0.85)';
         ctx.strokeStyle = n.color;
-        ctx.lineWidth = n.isCategory ? 3 : 1.5;
+        ctx.lineWidth = n.isCategory ? 2.5 : 1.2;
 
-        // Draw Circular node
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -423,9 +447,9 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
 
         ctx.restore();
 
-        // Node Labels text
+        // Node Text Labels
         ctx.fillStyle = isHovered || isDragged ? '#ffffff' : '#e2e8f0';
-        ctx.font = n.isCategory ? 'bold 12px var(--font-mono)' : '10px var(--font-mono)';
+        ctx.font = n.isCategory ? 'bold 12px var(--font-mono)' : '9px var(--font-mono)';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -445,7 +469,7 @@ export default function SkillsForceGraph({ theme }: SkillsForceGraphProps) {
     simulate();
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', resizeCanvas);
       canvas.removeEventListener('mousedown', handleMouseDown);
       canvas.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);

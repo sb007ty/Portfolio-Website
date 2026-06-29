@@ -5,6 +5,8 @@ import About from './components/About';
 import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
+import InteractiveBackground from './components/InteractiveBackground';
+import BootLoader from './components/BootLoader';
 
 interface Particle {
   id: number;
@@ -104,7 +106,11 @@ function App() {
   const [theme, setTheme] = useState<'cyberpunk' | 'matrix' | 'synthwave' | 'slate'>('cyberpunk');
   const [isGlitchActive, setIsGlitchActive] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [isBooting, setIsBooting] = useState(() => !sessionStorage.getItem('portfolio-booted'));
   const particleIdRef = useRef(0);
+  
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const cursorRingRef = useRef<HTMLDivElement>(null);
 
   const cycleTheme = () => {
     const themes: ('cyberpunk' | 'matrix' | 'synthwave' | 'slate')[] = ['cyberpunk', 'matrix', 'synthwave', 'slate'];
@@ -148,14 +154,87 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
-  // Track cursor position to update CSS variable for background glow
+  // Track cursor position to update CSS variables & handle custom cursor springs
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+
+    const handleMouseMoveGlow = (e: MouseEvent) => {
       document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
       document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMoveGlow);
+
+    if (!dot || !ring) return () => window.removeEventListener('mousemove', handleMouseMoveGlow);
+
+    // Hide custom cursor on mobile touch interfaces
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouch) {
+      dot.style.display = 'none';
+      ring.style.display = 'none';
+      return () => window.removeEventListener('mousemove', handleMouseMoveGlow);
+    }
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let ringX = -100;
+    let ringY = -100;
+
+    const handleMouseMoveCursor = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      dot.style.left = `${mouseX}px`;
+      dot.style.top = `${mouseY}px`;
+      dot.style.opacity = '1';
+      ring.style.opacity = '1';
+    };
+
+    const handleMouseLeave = () => {
+      dot.style.opacity = '0';
+      ring.style.opacity = '0';
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('a') || 
+                            target.closest('button') || 
+                            target.closest('.project-card') || 
+                            target.closest('.terminal-shortcut-btn') || 
+                            target.closest('.avatar-box-wrapper') ||
+                            target.closest('.toggle-btn') ||
+                            target.closest('.social-icon');
+      
+      if (isInteractive) {
+        document.documentElement.classList.add('cursor-expand');
+      } else {
+        document.documentElement.classList.remove('cursor-expand');
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMoveCursor);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('mouseover', handleMouseOver);
+
+    let animFrameId: number;
+    const tick = () => {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+
+      ring.style.left = `${ringX}px`;
+      ring.style.top = `${ringY}px`;
+
+      animFrameId = requestAnimationFrame(tick);
+    };
+    tick();
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMoveGlow);
+      window.removeEventListener('mousemove', handleMouseMoveCursor);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mouseover', handleMouseOver);
+      cancelAnimationFrame(animFrameId);
+    };
   }, []);
 
   // Initialize intersection observer for scroll-reveal animations
@@ -241,6 +320,16 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* BootLoader Screen overlay */}
+      {isBooting && <BootLoader onComplete={() => setIsBooting(false)} />}
+
+      {/* Custom lagging pointer cursor */}
+      <div ref={cursorDotRef} className="custom-cursor" aria-hidden="true" style={{ opacity: 0 }} />
+      <div ref={cursorRingRef} className="custom-cursor-ring" aria-hidden="true" style={{ opacity: 0 }} />
+
+      {/* Interactive Canvas 3D Perspective Grid Background */}
+      <InteractiveBackground theme={theme} />
+
       {/* Matrix Glitch Overlay */}
       <MatrixRain active={isGlitchActive} onClose={() => setIsGlitchActive(false)} />
 
@@ -282,7 +371,7 @@ function App() {
       <main>
         <Hero />
         <div className="reveal">
-          <About />
+          <About theme={theme} />
         </div>
         <div className="reveal">
           <Projects />

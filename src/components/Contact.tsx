@@ -32,7 +32,7 @@ export default function Contact() {
                 </svg>
               </div>
               <div className="contact-text">
-                <h4>Phone</h4>
+                {/* <h4>Phone</h4> */}
               </div>
             </div>
 

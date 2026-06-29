@@ -1,4 +1,13 @@
-export default function About() {
+import { useState } from 'react';
+import SkillsForceGraph from './SkillsForceGraph';
+
+interface AboutProps {
+  theme: 'cyberpunk' | 'matrix' | 'synthwave' | 'slate';
+}
+
+export default function About({ theme }: AboutProps) {
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
+
   const skillCategories = [
     {
       title: 'Programming Languages',
@@ -92,22 +101,45 @@ export default function About() {
         </div>
 
         <div className="skills-wrapper">
-          <h3 className="text-gradient">Technical Skills</h3>
-          {skillCategories.map((category) => (
-            <div key={category.title} className="skills-category glass-card">
-              <h4>
-                {category.icon}
-                {category.title}
-              </h4>
-              <div className="skills-list">
-                {category.skills.map((skill) => (
-                  <span key={skill} className="skill-tag">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+          <div className="skills-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h3 className="text-gradient" style={{ margin: 0 }}>Technical Skills</h3>
+            <div className="view-mode-toggle">
+              <button 
+                onClick={() => setViewMode('list')} 
+                className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              >
+                List View
+              </button>
+              <button 
+                onClick={() => setViewMode('graph')} 
+                className={`toggle-btn ${viewMode === 'graph' ? 'active' : ''}`}
+              >
+                Graph View
+              </button>
             </div>
-          ))}
+          </div>
+
+          {viewMode === 'list' ? (
+            <div className="skills-list-container">
+              {skillCategories.map((category) => (
+                <div key={category.title} className="skills-category glass-card">
+                  <h4>
+                    {category.icon}
+                    {category.title}
+                  </h4>
+                  <div className="skills-list">
+                    {category.skills.map((skill) => (
+                      <span key={skill} className="skill-tag">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <SkillsForceGraph theme={theme} />
+          )}
         </div>
       </div>
     </section>
